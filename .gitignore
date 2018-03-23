@@ -1,0 +1,11 @@
+# Python auto-generated files and folders:
+__pycache__/
+*.pyc
+
+# Sphinx auto-generated folders:
+doc/_*/
+
+# Backup files:
+*~
+*.bak
+*.kate-swp
