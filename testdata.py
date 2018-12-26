@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with PythonUtils. If not, see <http://www.gnu.org/licenses/>
 
+import os
+from math import ceil
+from random import sample
+
 def testData(data, before=None, after=None):
     def decorator(fun):
         def testDataFun(self):
@@ -34,17 +38,38 @@ def __foreachData(self, fun, data):
         caller = __directCaller
     else:
         caller = __subTestCaller
-        
-    for msg, datum in __generator(data):
+
+    prop = 1
+    try:
+        prop = os.environ['TESTDATA_PROP']
+        if prop == 'all':
+            prop = len(data)
+        elif prop.endswith('%'):
+            prop = ceil(float(prop[:-1])/100*len(data))
+        else:
+            prop = int(prop)
+        if prop <= 0:
+            prop = None
+    except(KeyError):
+        pass
+
+    for msg, datum in __generator(data, prop):
         caller(self, fun, msg, datum)
         
-def __generator(data):
-    if isinstance(data, list):
-        return zip([None]*len(data), data)
-    elif isinstance(data, dict):
-        return data
+def __generator(data, prop=None):
+    if prop is None:
+        if isinstance(data, list):
+            return zip([None]*len(data), data)
+        elif isinstance(data, dict):
+            return [(k, v) for k, v in data.items()]
     else:
-        raise ValueError('Test data must be a list or a dictionnary')
+        if isinstance(data, list):
+            return zip([None]*prop, [data[i] for i in sorted(sample(range(len(data)), prop))])
+        elif isinstance(data, dict):
+            keys = list(data.keys())
+            return [(keys[k], data[keys[k]]) for k in sorted(sample(range(len(keys)), prop))]
+
+    raise ValueError('Test data must be a list or a dictionnary')
        
 def __directCaller(self, fun, msg, datum):
     if isinstance(datum, dict):
