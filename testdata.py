@@ -19,18 +19,18 @@ import os
 from math import ceil
 from random import sample
 
-def testData(data, before=None, after=None):
+def testData(data, before=None, after=None, prop=1):
     def decorator(fun):
         def testDataFun(self):
             if before is not None:
                 before(self)
-            __foreachData(self, fun, data)
+            __foreachData(self, fun, data, prop)
             if after is not None:
                 after(self)
         return testDataFun
     return decorator 
 
-def __foreachData(self, fun, data):
+def __foreachData(self, fun, data, prop):
     if (len(data) == 0):
         fun(self)
         return
@@ -39,7 +39,6 @@ def __foreachData(self, fun, data):
     else:
         caller = __subTestCaller
 
-    prop = 1
     try:
         prop = os.environ['TESTDATA_PROP']
         if prop == 'all':
@@ -53,6 +52,7 @@ def __foreachData(self, fun, data):
     except(KeyError):
         pass
 
+    print(prop)
     for msg, datum in __generator(data, prop):
         caller(self, fun, msg, datum)
         
