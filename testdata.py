@@ -56,16 +56,14 @@ class TestData:
 
         self.__checkProp()
 
-    def getDecorator(self):
-        def decorator(fun):
-            def testDataFun(testSelf):
-                if self.__before is not None:
-                    self.__before(testSelf)
-                self.__foreach(testSelf, fun)
-                if self.__after is not None:
-                    self.__after(testSelf)
-            return testDataFun
-        return decorator
+    def __call__(self, fun):
+        def testDataFun(testSelf):
+            if self.__before is not None:
+                self.__before(testSelf)
+            self.__foreach(testSelf, fun)
+            if self.__after is not None:
+                self.__after(testSelf)
+        return testDataFun
 
     def __foreach(self, testSelf, fun):
         if self.__caller is None:
@@ -111,6 +109,3 @@ class TestData:
         else:
             with testSelf.subTest(msg=msg, arg=datum):
                 fun(testSelf, datum)
-
-def testData(data, before=None, after=None, prop=1, sort=False):
-    return TestData(data, before, after, prop, sort).getDecorator()
