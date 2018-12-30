@@ -25,6 +25,8 @@ class TestData:
             self.__prop = os.environ['TESTDATA_PROP']
         except(KeyError):
             pass
+        if 'TESTDATA_SORT' in os.environ:
+            self.__sort = True
 
     def __checkProp(self):
         if self.__prop == 'all':
@@ -36,7 +38,7 @@ class TestData:
         if self.__prop <= 0:
             self.__prop = None
 
-    def __init__(self, data, before=None, after=None, prop=1):
+    def __init__(self, data, before=None, after=None, prop=1, sort=False):
         self.__data = data
         if (len(self.__data) == 0):
             self.__caller = None
@@ -48,6 +50,7 @@ class TestData:
         self.__before = before
         self.__after = after
         self.__prop = prop
+        self.__sort = sort
 
         self.__applyEnv()
 
@@ -74,7 +77,9 @@ class TestData:
     def __generator(self):
         indexes = range(len(self.__data))
         if self.__prop is not None:
-            indexes = sorted(sample(indexes, self.__prop))
+            indexes = sample(indexes, self.__prop)
+        if self.__sort:
+            indexes.sort()
 
         if isinstance(self.__data, list):
             return [(None, self.__data[i]) for i in indexes]
@@ -107,5 +112,5 @@ class TestData:
             with testSelf.subTest(msg=msg, arg=datum):
                 fun(testSelf, datum)
 
-def testData(data, before=None, after=None, prop=1):
-    return TestData(data, before, after, prop).getDecorator()
+def testData(data, before=None, after=None, prop=1, sort=False):
+    return TestData(data, before, after, prop, sort).getDecorator()
