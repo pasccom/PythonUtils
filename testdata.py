@@ -19,77 +19,96 @@ import os
 from math import ceil
 from random import sample
 
+class TestData:
+    def __applyEnv(self):
+        try:
+            self.__prop = os.environ['TESTDATA_PROP']
+        except(KeyError):
+            pass
+
+    def __checkProp(self):
+        if self.__prop == 'all':
+            self.__prop = len(self.__data)
+        elif (type(self.__prop) is str) and self.__prop.endswith('%'):
+            self.__prop = ceil(float(self.__prop[:-1])/100*len(self.__data))
+        else:
+            self.__prop = int(self.__prop)
+        if self.__prop <= 0:
+            self.__prop = None
+
+    def __init__(self, data, before=None, after=None, prop=1):
+        self.__data = data
+        if (len(self.__data) == 0):
+            self.__caller = None
+        elif (len(self.__data) == 1):
+            self.__caller = self.__directCaller
+        else:
+            self.__caller = self.__subTestCaller
+
+        self.__before = before
+        self.__after = after
+        self.__prop = prop
+
+        self.__applyEnv()
+
+        self.__checkProp()
+
+    def getDecorator(self):
+        def decorator(fun):
+            def testDataFun(testSelf):
+                if self.__before is not None:
+                    self.__before(testSelf)
+                self.__foreach(testSelf, fun)
+                if self.__after is not None:
+                    self.__after(testSelf)
+            return testDataFun
+        return decorator
+
+    def __foreach(self, testSelf, fun):
+        if self.__caller is None:
+            fun(testSelf)
+        else:
+            for msg, datum in self.__generator():
+                self.__caller(testSelf, fun, msg, datum)
+
+    def __generator(self):
+        if self.__prop is None:
+            if isinstance(self.__data, list):
+                return zip([None]*len(self.__data), self.__data)
+            elif isinstance(self.__data, dict):
+                return [(k, v) for k, v in self.__data.items()]
+        else:
+            if isinstance(self.__data, list):
+                return zip([None]*self.__prop, [self.__data[i] for i in sorted(sample(range(len(self.__data)), self.__prop))])
+            elif isinstance(self.__data, dict):
+                keys = list(self.__data.keys())
+                return [(keys[k], self.__data[keys[k]]) for k in sorted(sample(range(len(keys)), self.__prop))]
+
+        raise ValueError('Test data must be a list or a dictionnary')
+
+
+    def __directCaller(self, testSelf, fun, msg, datum):
+        if isinstance(datum, dict):
+            fun(testSelf, **datum)
+        elif isinstance(datum, list) or isinstance(datum, tuple):
+            fun(testSelf, *datum)
+        else:
+            fun(testSelf, datum)
+
+    def __subTestCaller(self, testSelf, fun, msg, datum):
+        if isinstance(datum, dict):
+            with testSelf.subTest(msg=msg, **datum):
+                fun(testSelf, **datum)
+        elif isinstance(datum, list) or isinstance(datum, tuple):
+            if msg is None:
+                kwargs = {'arg' + str(a + 1) : v for a, v in enumerate(datum)}
+            else:
+                kwargs = {}
+            with testSelf.subTest(msg=msg, **kwargs):
+                fun(testSelf, *datum)
+        else:
+            with testSelf.subTest(msg=msg, arg=datum):
+                fun(testSelf, datum)
+
 def testData(data, before=None, after=None, prop=1):
-    def decorator(fun):
-        def testDataFun(self):
-            if before is not None:
-                before(self)
-            __foreachData(self, fun, data, prop)
-            if after is not None:
-                after(self)
-        return testDataFun
-    return decorator 
-
-def __foreachData(self, fun, data, prop):
-    if (len(data) == 0):
-        fun(self)
-        return
-    elif (len(data) == 1):
-        caller = __directCaller
-    else:
-        caller = __subTestCaller
-
-    try:
-        prop = os.environ['TESTDATA_PROP']
-        if prop == 'all':
-            prop = len(data)
-        elif prop.endswith('%'):
-            prop = ceil(float(prop[:-1])/100*len(data))
-        else:
-            prop = int(prop)
-        if prop <= 0:
-            prop = None
-    except(KeyError):
-        pass
-
-    print(prop)
-    for msg, datum in __generator(data, prop):
-        caller(self, fun, msg, datum)
-        
-def __generator(data, prop=None):
-    if prop is None:
-        if isinstance(data, list):
-            return zip([None]*len(data), data)
-        elif isinstance(data, dict):
-            return [(k, v) for k, v in data.items()]
-    else:
-        if isinstance(data, list):
-            return zip([None]*prop, [data[i] for i in sorted(sample(range(len(data)), prop))])
-        elif isinstance(data, dict):
-            keys = list(data.keys())
-            return [(keys[k], data[keys[k]]) for k in sorted(sample(range(len(keys)), prop))]
-
-    raise ValueError('Test data must be a list or a dictionnary')
-       
-def __directCaller(self, fun, msg, datum):
-    if isinstance(datum, dict):
-        fun(self, **datum)
-    elif isinstance(datum, list) or isinstance(datum, tuple):
-        fun(self, *datum)
-    else:
-        fun(self, datum)
-            
-def __subTestCaller(self, fun, msg, datum):
-    if isinstance(datum, dict):
-        with self.subTest(msg=msg, **datum):
-            fun(self, **datum)
-    elif isinstance(datum, list) or isinstance(datum, tuple):
-        if msg is None:
-            kwargs = {'arg' + str(a + 1) : v for a, v in enumerate(datum)}
-        else:
-            kwargs = {}
-        with self.subTest(msg=msg, **kwargs):
-            fun(self, *datum)
-    else:
-        with self.subTest(msg=msg, arg=datum):
-            fun(self, datum)
+    return TestData(data, before, after, prop).getDecorator()
