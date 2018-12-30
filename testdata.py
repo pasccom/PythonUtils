@@ -72,20 +72,17 @@ class TestData:
                 self.__caller(testSelf, fun, msg, datum)
 
     def __generator(self):
-        if self.__prop is None:
-            if isinstance(self.__data, list):
-                return zip([None]*len(self.__data), self.__data)
-            elif isinstance(self.__data, dict):
-                return [(k, v) for k, v in self.__data.items()]
-        else:
-            if isinstance(self.__data, list):
-                return zip([None]*self.__prop, [self.__data[i] for i in sorted(sample(range(len(self.__data)), self.__prop))])
-            elif isinstance(self.__data, dict):
-                keys = list(self.__data.keys())
-                return [(keys[k], self.__data[keys[k]]) for k in sorted(sample(range(len(keys)), self.__prop))]
+        indexes = range(len(self.__data))
+        if self.__prop is not None:
+            indexes = sorted(sample(indexes, self.__prop))
+
+        if isinstance(self.__data, list):
+            return [(None, self.__data[i]) for i in indexes]
+        elif isinstance(self.__data, dict):
+            dataItems = list(self.__data.items())
+            return [dataItems[i] for i in indexes]
 
         raise ValueError('Test data must be a list or a dictionnary')
-
 
     def __directCaller(self, testSelf, fun, msg, datum):
         if isinstance(datum, dict):
