@@ -19,12 +19,12 @@
 Test utils
 ==========
 
-.. decorator:: testData(data[, before=None, after=None])
+.. decorator:: TestData(data[, before=None, after=None, prop=1, sort=False, addIndexes=[]])
 
    This decorator is intended to be used on :mod:`unittest` fixtures.
    
    It runs the test fixture for each given datum in a :meth:`unittest.TestCase.subTest` context manager.
-   Before running the fixture, it runs the function *before*, if not `None` and
+   Before running all the subtests in the fixture, it runs the function *before*, if not `None` and
    after running the fixture, it runs the function *after*, if not `None`.
    
    *data* can be:
@@ -37,6 +37,19 @@ Test utils
    * A :class:`tuple` or a :class:`list`: Each item corresponds to an argument of the test fixture function in sequential order
    * A :class:`dict`: Each element corresponds to an argument of the test fixture function depending on key.
        
+   *prop* allows to subsample the test. It can be:
+
+   * `'all'`: The test feature is run for all the data set
+   * A percentage as a string (e.g. `'50%'` ): The test feature is run at least for this percentage of the data set
+   * An integer (e.g. `2`): The test feature is run on this number of data elements
+
+   This parameter can be overriden for all tests by the environment variable `TESTDATA_PROP` (using the same values).
+
+   *sort* forces the sub tests to be executed in the order of the list (by default they are unsorted).
+   Sorting sub tests can be forced by the environment variable `TESTDATA_SORT` (whatever its value).
+
+   *addIndexes* is a :class:`list` of sub test indexes (beginning at `0`), which must always be run.
+
    Examples::
       
       @testData([
