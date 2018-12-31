@@ -45,10 +45,12 @@ Test utils
 
    This parameter can be overriden for all tests by the environment variable `TESTDATA_PROP` (using the same values).
 
-   *sort* forces the sub tests to be executed in the order of the list (by default they are unsorted).
+   *sort* forces the sub tests to be executed in the order of the :class:`list` (by default they are unsorted).
+   Sorting is unsupported for :class:`dict` data sets (which are essentially unordered).
    Sorting sub tests can be forced by the environment variable `TESTDATA_SORT` (whatever its value).
 
-   *addIndexes* is a :class:`list` of sub test indexes (beginning at `0`), which must always be run.
+   *addIndexes* is a :class:`list` of sub test indexes (beginning at `0`) if *data* is a :class:`list`
+   or keys if *data* is a :class:`dict`, which must always be run.
 
    Examples::
       
