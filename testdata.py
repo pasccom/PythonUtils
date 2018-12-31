@@ -38,7 +38,7 @@ class TestData:
         if self.__prop <= 0:
             self.__prop = None
 
-    def __init__(self, data, before=None, after=None, prop=1, sort=False):
+    def __init__(self, data, before=None, after=None, prop=1, sort=False, addIndexes=[]):
         self.__data = data
         if (len(self.__data) == 0):
             self.__caller = None
@@ -51,6 +51,7 @@ class TestData:
         self.__after = after
         self.__prop = prop
         self.__sort = sort
+        self.__addIndexes = addIndexes
 
         self.__applyEnv()
 
@@ -73,9 +74,10 @@ class TestData:
                 self.__caller(testSelf, fun, msg, datum)
 
     def __generator(self):
-        indexes = range(len(self.__data))
+        indexes = [i for i in range(len(self.__data)) if not i in self.__addIndexes]
         if self.__prop is not None:
-            indexes = sample(indexes, self.__prop)
+            indexes = sample(indexes, min(len(indexes), self.__prop))
+        indexes += self.__addIndexes
         if self.__sort:
             indexes.sort()
 
