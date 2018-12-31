@@ -74,18 +74,23 @@ class TestData:
                 self.__caller(testSelf, fun, msg, datum)
 
     def __generator(self):
-        indexes = [i for i in range(len(self.__data)) if not i in self.__addIndexes]
+        if isinstance(self.__data, list):
+            addIndexes = self.__addIndexes
+        elif isinstance(self.__data, dict):
+            keys = list(self.__data.keys())
+            addIndexes = [keys.index(k) for k in self.__addIndexes]
+
+        indexes = [i for i in range(len(self.__data)) if not i in addIndexes]
         if self.__prop is not None:
             indexes = sample(indexes, min(len(indexes), self.__prop))
-        indexes += self.__addIndexes
+        indexes += addIndexes
         if self.__sort:
             indexes.sort()
 
         if isinstance(self.__data, list):
             return [(None, self.__data[i]) for i in indexes]
         elif isinstance(self.__data, dict):
-            dataItems = list(self.__data.items())
-            return [dataItems[i] for i in indexes]
+            return [(keys[i], self.__data[keys[i]]) for i in indexes]
 
         raise ValueError('Test data must be a list or a dictionnary')
 
