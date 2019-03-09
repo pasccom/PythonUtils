@@ -16,22 +16,7 @@
    You should have received a copy of the GNU General Public License
    along with PythonUtils. If not, see <http://www.gnu.org/licenses/>
 
-Welcome to PythonUtils' documentation!
-======================================
+TestData decorator
+==================
 
-This Python module contains utilities I developed to improve my Python experience.
-
-Contents
---------
-.. toctree::
-   :maxdepth: 2
-   
-   testdata
-
-.. :and tables
-.. ==================
-
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`
-
+.. autoclass:: testdata.TestData
