@@ -25,10 +25,12 @@ class TestData:
         This class acts as a decorator which is intended to be used on :mod:`unittest` fixtures.
 
         It runs the test fixture for each given datum in a :meth:`unittest.TestCase.subTest` context manager.
-        Before running all the subtests in the fixture, it runs the function *before*, if not `None` and
-        after running the fixture, it runs the function *after*, if not `None`.
+        Before running all the subtests in the fixture, it runs the function *before*, if not ``None`` and
+        after running the fixture, it runs the function *after*, if not ``None``.
 
-        *data* can be:
+        **Parameters:**
+
+        *data* -- can be:
 
         * A :class:`list`: the test fixture will be called on each item of the list without message
         * A :class:`dict`: the test fixture will be called on each value in the dictionnary with the corresponing key as message
@@ -38,22 +40,22 @@ class TestData:
         * A :class:`tuple` or a :class:`list`: Each item corresponds to an argument of the test fixture function in sequential order
         * A :class:`dict`: Each element corresponds to an argument of the test fixture function depending on key.
 
-        *prop* allows to subsample the test. It can be:
+        *prop* -- Allows to subsample the test. It can be:
 
-        * `'all'`: The test feature is run for all the data set
-        * A percentage as a string (e.g. `'50%'` ): The test feature is run at least for this percentage of the data set
-        * An integer (e.g. `2`): The test feature is run on this number of data elements
+        * ``'all'``: The test feature is run for all the data set
+        * A percentage as a string (e.g. ``'50%'`` ): The test feature is run at least for this percentage of the data set
+        * An integer (e.g. ``2``): The test feature is run on this number of data elements
 
-        This parameter can be overriden for all tests by the environment variable `TESTDATA_PROP` (using the same values).
+        This parameter can be overriden for all tests by the environment variable ``TESTDATA_PROP`` (using the same values).
 
-        *sort* forces the sub tests to be executed in the order of the :class:`list` (by default they are unsorted).
+        *sort* -- forces the sub tests to be executed in the order of the :class:`list` (by default they are unsorted).
         Sorting is unsupported for :class:`dict` data sets (which are essentially unordered).
-        Sorting sub tests can be forced by the environment variable `TESTDATA_SORT` (whatever its value).
+        Sorting sub tests can be forced by the environment variable ``TESTDATA_SORT`` (whatever its value).
 
-        *addIndexes* is a :class:`list` of sub test indexes (beginning at `0`) if *data* is a :class:`list`
+        *addIndexes* -- is a :class:`list` of sub test indexes (beginning at ``0``) if *data* is a :class:`list`
         or keys if *data* is a :class:`dict`, which must always be run.
 
-        Examples::
+        **Examples**::
 
             @TestData([
                 {'a': -1, 'a2': 1},
@@ -67,7 +69,7 @@ class TestData:
                 'negative': [-1, -1],
                 'zero'    : [0,  0 ],
                 'positive': [1,  1 ],
-            ])
+            })
             def testCube(self, a, a3):
                 self.assertEqual(a**3, a3)
     """
