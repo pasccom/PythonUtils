@@ -134,14 +134,18 @@ class TestData:
 
     def __foreach(self, testSelf, fun):
         if self.__caller is None:
-            self.__beforeEach(testSelf)
+            if self.__beforeEach is not None:
+                self.__beforeEach(testSelf)
             fun(testSelf)
-            self.__afterEach(testSelf)
+            if self.__afterEach is not None:
+                self.__afterEach(testSelf)
         else:
             for msg, datum in self.__generator():
-                self.__beforeEach(testSelf)
+                if self.__beforeEach is not None:
+                    self.__beforeEach(testSelf)
                 self.__caller(testSelf, fun, msg, datum)
-                self.__afterEach(testSelf)
+                if self.__afterEach is not None:
+                    self.__afterEach(testSelf)
 
     def __generator(self):
         if isinstance(self.__data, list):
