@@ -20,13 +20,15 @@ from math import ceil
 from random import sample
 
 class TestData:
-    """ TestData(data[, before=None, after=None, prop=1, sort=False, addIndexes=[]])
+    """ TestData(data[, beforeAll=None, beforeEach=None, afterEach=None, afterAll=None, prop=1, sort=False, addIndexes=[]])
 
         This class acts as a decorator which is intended to be used on :mod:`unittest` fixtures.
 
         It runs the test fixture for each given datum in a :meth:`unittest.TestCase.subTest` context manager.
-        Before running all the subtests in the fixture, it runs the function *before*, if not ``None`` and
-        after running the fixture, it runs the function *after*, if not ``None``.
+        Before running all subtests in the fixture, it runs the function *beforeAll*, if not ``None`` and
+        after running all subtests in the fixture, it runs the function *afterAll*, if not ``None``.
+        Before running each subtest in the fixture, it runs the function *beforeEach*, if not ``None`` and
+        after running each subtest in the fixture, it runs the function *afterEach*, if not ``None``.
 
         **Parameters:**
 
@@ -39,6 +41,14 @@ class TestData:
 
         * A :class:`tuple` or a :class:`list`: Each item corresponds to an argument of the test fixture function in sequential order
         * A :class:`dict`: Each element corresponds to an argument of the test fixture function depending on key.
+
+        *beforeAll* -- A function to be run before all subtests in the fixture
+
+        *beforeEach* -- A function to be run before each subtest in the fixture
+
+        *afterEach* -- A function to be run after each subtest in the fixture
+
+        *afterAll* -- A function to be run after all subtests in the fixture
 
         *prop* -- Allows to subsample the test. It can be:
 
@@ -92,7 +102,7 @@ class TestData:
         if self.__prop <= 0:
             self.__prop = None
 
-    def __init__(self, data, before=None, after=None, prop=1, sort=False, addIndexes=[]):
+    def __init__(self, data, beforeAll=None, beforeEach=None, afterEach=None, afterAll=None, prop=1, sort=False, addIndexes=[]):
         self.__data = data
         if (len(self.__data) == 0):
             self.__caller = None
@@ -101,8 +111,10 @@ class TestData:
         else:
             self.__caller = self.__subTestCaller
 
-        self.__before = before
-        self.__after = after
+        self.__beforeAll = beforeAll
+        self.__beforeEach = beforeEach
+        self.__afterEach = afterEach
+        self.__afterAll = afterAll
         self.__prop = prop
         self.__sort = sort
         self.__addIndexes = addIndexes
@@ -113,19 +125,23 @@ class TestData:
 
     def __call__(self, fun):
         def testDataFun(testSelf):
-            if self.__before is not None:
-                self.__before(testSelf)
+            if self.__beforeAll is not None:
+                self.__beforeAll(testSelf)
             self.__foreach(testSelf, fun)
-            if self.__after is not None:
-                self.__after(testSelf)
+            if self.__afterAll is not None:
+                self.__afterAll(testSelf)
         return testDataFun
 
     def __foreach(self, testSelf, fun):
         if self.__caller is None:
+            self.__beforeEach(testSelf)
             fun(testSelf)
+            self.__afterEach(testSelf)
         else:
             for msg, datum in self.__generator():
+                self.__beforeEach(testSelf)
                 self.__caller(testSelf, fun, msg, datum)
+                self.__afterEach(testSelf)
 
     def __generator(self):
         if isinstance(self.__data, list):
