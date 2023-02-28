@@ -1,4 +1,4 @@
-.. Copyright 2018 Pascal COMBES <pascom@orange.fr>
+.. Copyright 2018-2023 Pascal COMBES <pascom@orange.fr>
    
    PythonUtils documentation master file,
    written by Pascal COMBES on Thu Mar 22 22:36:04 2018.

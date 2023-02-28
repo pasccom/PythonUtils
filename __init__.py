@@ -1,4 +1,4 @@
-# Copyright 2018 Pascal COMBES <pascom@orange.fr>
+# Copyright 2018-2023 Pascal COMBES <pascom@orange.fr>
 #
 # This file is part of PythonUtils.
 #
